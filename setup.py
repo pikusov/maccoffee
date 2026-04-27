@@ -1,6 +1,9 @@
 from setuptools import setup
 
 APP = ["src/app.py"]
+DATA_FILES = [
+    ("", ["com.pixel.maccoffee.plist"]),
+]
 OPTIONS = {
     "argv_emulation": False,
     "iconfile": "src/MacCoffee.icns",
@@ -21,6 +24,7 @@ OPTIONS = {
 setup(
     app=APP,
     name="MacCoffee",
+    data_files=DATA_FILES,
     options={"py2app": OPTIONS},
     setup_requires=["py2app"],
 )
