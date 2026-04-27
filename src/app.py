@@ -95,6 +95,7 @@ class MacCoffeeApp(rumps.App):
 
     def __init__(self):
         self._lock = _acquire_lock()
+        self._applying = False
         # Read system state before any UI initialisation
         self._sleep_disabled = get_sleep_disabled()
 
@@ -119,6 +120,8 @@ class MacCoffeeApp(rumps.App):
 
     def _poll(self, _):
         """Fires every 5 s — syncs icon if pmset was changed externally."""
+        if self._applying:
+            return
         current = get_sleep_disabled()
         if current != self._sleep_disabled:
             self._sleep_disabled = current
@@ -151,6 +154,7 @@ class MacCoffeeApp(rumps.App):
 
     # ── commands ──────────────────────────────────────────────────────────────
     def _apply(self, disabled: bool):
+        self._applying = True
         try:
             set_sleep_disabled(disabled)
         except subprocess.CalledProcessError:
@@ -159,6 +163,8 @@ class MacCoffeeApp(rumps.App):
                 "Could not change setting — admin password required.",
             )
             return
+        finally:
+            self._applying = False
         self._sleep_disabled = disabled
         self._sync_ui()
 
