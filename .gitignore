@@ -1,0 +1,19 @@
+# py2app build artifacts
+build/
+dist/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+.venv/
+.venv_*/
+
+# macOS
+.DS_Store
+*.iconset/
+
+# Logs & lock files
+/tmp/*.log
+/tmp/*.lock
