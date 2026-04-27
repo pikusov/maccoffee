@@ -8,8 +8,10 @@ MacCoffee — macOS menu bar app to toggle lid-close sleep behavior.
 Polls pmset every 5 s so the icon always reflects the real system state.
 """
 
+import fcntl
 import os
 import subprocess
+import sys
 
 import rumps
 from AppKit import NSApplication
@@ -19,9 +21,17 @@ VERSION = "1.0"
 _PLIST_NAME = "com.pixel.maccoffee.plist"
 _PLIST_PATH = os.path.expanduser(f"~/Library/LaunchAgents/{_PLIST_NAME}")
 _APP_PATH   = "/Applications/MacCoffee.app"
-_PLIST_SRC  = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "..", _PLIST_NAME
-)
+_LOCK_FILE  = "/tmp/com.pixel.maccoffee.lock"
+
+
+def _acquire_lock():
+    """Ensure only one instance runs. Exits immediately if another is running."""
+    lock = open(_LOCK_FILE, "w")
+    try:
+        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        sys.exit(0)
+    return lock  # keep reference so GC doesn't close/release it
 
 
 # ── pmset ─────────────────────────────────────────────────────────────────────
@@ -84,6 +94,7 @@ class MacCoffeeApp(rumps.App):
     _EMOJI_SLEEP = "🌙"
 
     def __init__(self):
+        self._lock = _acquire_lock()
         # Read system state before any UI initialisation
         self._sleep_disabled = get_sleep_disabled()
 

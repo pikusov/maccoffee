@@ -9,7 +9,7 @@
         <string>/Applications/MacCoffee.app/Contents/MacOS/MacCoffee</string>
     </array>
     <key>RunAtLoad</key>
-    <true/>
+    <false/>
     <key>KeepAlive</key>
     <true/>
     <key>StandardOutPath</key>
