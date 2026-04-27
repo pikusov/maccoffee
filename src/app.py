@@ -153,29 +153,28 @@ class MacCoffeeApp(rumps.App):
         self._sync_ui()
 
     # ── commands ──────────────────────────────────────────────────────────────
-    def _apply(self, disabled: bool):
+    def _apply(self, target: bool):
+        """Apply target state. Pauses poll for the duration of the auth dialog."""
         self._applying = True
         try:
-            set_sleep_disabled(disabled)
+            set_sleep_disabled(target)
+            self._sleep_disabled = target
+            self._sync_ui()
         except subprocess.CalledProcessError:
+            # User cancelled password — re-read real state
+            self._sleep_disabled = get_sleep_disabled()
+            self._sync_ui()
             rumps.notification(
                 "MacCoffee", "Error",
                 "Could not change setting — admin password required.",
             )
-            return
         finally:
             self._applying = False
-        self._sleep_disabled = disabled
-        self._sync_ui()
 
     def _cmd_sleep(self, _):
-        if not self._sleep_disabled:
-            return
         self._apply(False)
 
     def _cmd_awake(self, _):
-        if self._sleep_disabled:
-            return
         self._apply(True)
 
     def _cmd_toggle_login(self, _):
@@ -208,11 +207,11 @@ class MacCoffeeApp(rumps.App):
 
     def _quit(self, _):
         self._timer.stop()
-        if self._sleep_disabled:
-            try:
-                set_sleep_disabled(False)
-            except Exception:
-                pass
+        # Always restore sleep-on-lid-close when quitting
+        try:
+            set_sleep_disabled(False)
+        except Exception:
+            pass
         NSApplication.sharedApplication().terminate_(None)
 
 
