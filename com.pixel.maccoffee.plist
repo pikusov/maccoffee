@@ -11,7 +11,7 @@
     <key>RunAtLoad</key>
     <false/>
     <key>KeepAlive</key>
-    <true/>
+    <false/>
     <key>StandardOutPath</key>
     <string>/tmp/maccoffee.log</string>
     <key>StandardErrorPath</key>
